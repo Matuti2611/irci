@@ -1,0 +1,101 @@
+.section ".text"
+
+main:
+
+    // Dirección MMIO de la consola (0xFFFFFF00)
+    lw $s0, MMIO_ADDR($zero)
+
+    // Posición inicial del cursor (0 a 15)
+    lb   $s1, pos_x($zero)
+    lb   $s2, pos_y($zero)
+
+loop_principal:
+    lb   $t2, 0($s0)
+    beq  $t2, $zero, loop_principal
+
+    // 'w' (119) -> Mover 1 casilla Arriba
+    addi $t3, $zero, 119
+    beq  $t2, $t3, mover_w
+
+    // 's' (115) -> Mover 1 casilla Abajo
+    addi $t3, $zero, 115
+    beq  $t2, $t3, mover_s
+
+    // 'a' (97) -> Mover 1 casilla Izquierda
+    addi $t3, $zero, 97
+    beq  $t2, $t3, mover_a
+
+    // 'd' (100) -> Mover 1 casilla Derecha
+    addi $t3, $zero, 100
+    beq  $t2, $t3, mover_d
+
+    // Enter: LF (10) o CR (13) -> Pintar '#'
+    addi $t3, $zero, 10
+    beq  $t2, $t3, pintar_pixel
+    addi $t3, $zero, 13
+    beq  $t2, $t3, pintar_pixel
+
+    // Backspace: BS (8) o DEL (127) -> Borrar con ' '
+    addi $t3, $zero, 8
+    beq  $t2, $t3, borrar_pixel
+    addi $t3, $zero, 127
+    beq  $t2, $t3, borrar_pixel
+
+    // Tecla descartada
+    j    loop_principal
+
+mover_w:
+    beq  $s2, $zero, loop_principal
+    addi $s2, $s2, -1
+    addi $a0, $zero, str_w
+    j    enviar_escape
+
+mover_s:
+    addi $t1, $zero, 15
+    beq  $s2, $t1, loop_principal
+    addi $s2, $s2, 1
+    addi $a0, $zero, str_s
+    j    enviar_escape
+
+mover_a:
+    beq  $s1, $zero, loop_principal
+    addi $s1, $s1, -1
+    addi $a0, $zero, str_a
+    j    enviar_escape
+
+mover_d:
+    addi $t1, $zero, 15
+    beq  $s1, $t1, loop_principal
+    addi $s1, $s1, 1
+    addi $a0, $zero, str_d
+    j    enviar_escape
+
+enviar_escape:
+    lb   $t0, 0($a0)
+    beq  $t0, $zero, loop_principal
+    sb   $t0, 0($s0)
+    addi $a0, $a0, 1
+    j    enviar_escape
+
+pintar_pixel:
+    addi $t0, $zero, 35          // '#'
+    sb   $t0, 0($s0)
+    addi $t0, $zero, 8           // Backspace
+    sb   $t0, 0($s0)
+    j    loop_principal
+
+borrar_pixel:
+    addi $t0, $zero, 32          // ' ' (espacio)
+    sb   $t0, 0($s0)
+    addi $t0, $zero, 8           // Backspace
+    sb   $t0, 0($s0)
+    j    loop_principal
+
+.section ".data"
+MMIO_ADDR:    .word 0xFFFFFF00
+pos_x:        .byte 0
+pos_y:        .byte 0
+str_w:        .asciiz "\x1b[A"
+str_s:        .asciiz "\x1b[B"
+str_a:        .asciiz "\x1b[D"
+str_d:        .asciiz "\x1b[C"
