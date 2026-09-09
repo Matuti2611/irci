@@ -1,0 +1,16 @@
+[submodule "Branch-Zero"]
+	path = Branch-Zero
+	url = https://github.com/Matuti2611/Branch-Zero.git
+	branch = main
+[submodule "intrucciones-cpu-c"]
+	path = intrucciones-cpu-c
+	url = https://github.com/Matuti2611/intrucciones-cpu-c.git
+	branch = main
+[submodule "instrucciones-procesador"]
+	path = instrucciones-procesador
+	url = https://github.com/Matuti2611/instrucciones-procesador.git
+	branch = main
+[submodule "Trabajo-BCMS"]
+	path = Trabajo-BCMS
+	url = https://github.com/Matuti2611/Trabajo-BCMS.git
+	branch = main
